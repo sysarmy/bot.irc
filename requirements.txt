@@ -1,0 +1,7 @@
+aiohttp==3.13.3
+beautifulsoup4==4.12.3
+ics==0.7.2
+python-dotenv==1.0.1
+ratelimit==2.2.1
+requests==2.32.4
+TatSu==5.8.3

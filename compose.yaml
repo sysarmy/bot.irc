@@ -1,0 +1,9 @@
+services:
+  bot:
+    build: .
+    user: "${PUID:-1000}:${PGID:-1000}"
+    env_file:
+      - .env
+    volumes:
+      - ./db:/app/db
+    restart: unless-stopped

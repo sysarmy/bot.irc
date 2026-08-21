@@ -1,0 +1,7 @@
+.env
+.git
+.gitignore
+db
+__pycache__
+*.pyc
+tests
