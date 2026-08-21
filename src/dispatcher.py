@@ -18,6 +18,7 @@ from src.commands.ctxpesos import pesosfunctx
 from src.commands.ctxquote import qsearchfunctx, quoteaddfunctx, quotefunctx
 from src.commands.ctxsubte import subtefunctx
 from src.commands.ctxunderground import undergroundfunctx
+from src.help import help_message
 
 
 LOGGER = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ async def dispatch(ctx: CommandContext, content: str) -> None:
     command = command.lower()
 
     if command == "help":
-        await ctx.send("Comandos: !birras !caucho !clima !cripto !dolar !euro !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy !fulbo !rank !karma !kgivers !kgiven !pesos !q !qadd !qsearch !subte !underground !ping !flip !shrug")
+        await ctx.send(help_message(argument))
         return
     if command == "ping":
         await ctx.send("Pong!")
