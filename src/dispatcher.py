@@ -17,6 +17,7 @@ from src.commands.ctxkarma import karmagiversfunctx, karmagiversuserfunctx, karm
 from src.commands.ctxpesos import pesosfunctx
 from src.commands.ctxquote import qsearchfunctx, quoteaddfunctx, quotefunctx
 from src.commands.ctxsubte import subtefunctx
+from src.commands.ctxstatus import statusfunctx
 from src.commands.ctxunderground import undergroundfunctx
 from src.help import help_message, missing_argument_message
 
@@ -48,7 +49,8 @@ COMMANDS = {
     "kgivers": (karmagiversfunctx, 0), "kgiven": (karmagiversuserfunctx, 1),
     "pesos": (pesosfunctx, 1), "q": (quotefunctx, 0),
     "qadd": (quoteaddfunctx, 1), "qsearch": (qsearchfunctx, 1),
-    "subte": (subtefunctx, 0), "underground": (undergroundfunctx, 0),
+    "subte": (subtefunctx, 0), "status": (statusfunctx, 1),
+    "underground": (undergroundfunctx, 0),
 }
 
 

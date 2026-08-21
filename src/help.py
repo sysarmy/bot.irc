@@ -20,6 +20,7 @@ COMMAND_HELP = {
     "qadd": "!qadd <cita> - Agrega una cita al historial. Ejemplo: !qadd <nachi> esto queda para la posteridad",
     "qsearch": "!qsearch <texto> - Busca citas por texto o usuario. Ejemplo: !qsearch kubernetes",
     "subte": "!subte - Muestra el estado del Subte de Buenos Aires.",
+    "status": "!status <servicio> - Muestra el estado actual y uptime estimado de los ultimos 30 dias. Servicios soportados: github. Ejemplo: !status github",
     "underground": "!underground - Muestra el estado del Underground de Londres.",
     "ping": "!ping - Comprueba si el bot esta respondiendo.",
     "flip": "!flip - Tira una mesa. No requiere argumentos.",
@@ -35,11 +36,12 @@ REQUIRED_ARGUMENTS = {
     "pesos": "monto",
     "qadd": "cita",
     "qsearch": "texto",
+    "status": "servicio",
 }
 
 
 GENERAL_HELP = """Estos son los comandos disponibles en el bot de Sysarmy:
-!rank !karma !kgivers !kgiven | !q !qadd !qsearch | !caucho !cripto !dolar !euro !pesos | !clima !fulbo !subte !underground | !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy | !birras | !ping !flip !shrug
+!rank !karma !kgivers !kgiven | !q !qadd !qsearch | !caucho !cripto !dolar !euro !pesos | !clima !fulbo !subte !underground !status | !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy | !birras | !ping !flip !shrug
 Ejecuta !help <comando> para ver mas informacion. Ejemplo: !help karma"""
 
 
