@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 import unittest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock, call, patch
 
-from src.commands.ctxstatus import estimated_uptime, statusfunctx
+from src.commands.ctxstatus import STATUSPAGE_SERVICES, estimated_uptime, statusfunctx, supported_services
 
 
 class StatusTests(unittest.IsolatedAsyncioTestCase):
@@ -21,15 +21,45 @@ class StatusTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertAlmostEqual(estimated_uptime(incidents, now), 98.333333, places=5)
 
-    async def test_only_github_is_supported(self):
+    async def test_unknown_service_lists_supported_services(self):
         ctx = unittest.mock.Mock()
         ctx.send = AsyncMock()
 
         await statusfunctx(ctx, "gitlab")
 
         ctx.send.assert_awaited_once_with(
-            "Servicio no soportado. Servicios disponibles: github"
+            f"Servicio no soportado. Servicios disponibles: {supported_services()}"
         )
+
+    async def test_statuspage_service_uses_its_configured_endpoints(self):
+        status_response = Mock()
+        status_response.raise_for_status.return_value = None
+        status_response.json.return_value = {
+            "status": {"indicator": "none", "description": "All Systems Operational"}
+        }
+        incidents_response = Mock()
+        incidents_response.raise_for_status.return_value = None
+        incidents_response.json.return_value = {"incidents": []}
+        ctx = unittest.mock.Mock()
+        ctx.send = AsyncMock()
+
+        with patch(
+            "src.commands.ctxstatus.requests.get",
+            side_effect=[status_response, incidents_response],
+        ) as get:
+            await statusfunctx(ctx, "Cloudflare")
+
+        status_url = STATUSPAGE_SERVICES["cloudflare"][1]
+        self.assertEqual(
+            get.call_args_list,
+            [
+                call(f"{status_url}/api/v2/status.json", timeout=10),
+                call(f"{status_url}/api/v2/incidents.json", timeout=10),
+            ],
+        )
+        message = ctx.send.await_args.args[0]
+        self.assertIn("Cloudflare: UP", message)
+        self.assertIn("100.000%", message)
 
 
 if __name__ == "__main__":

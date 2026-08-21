@@ -3,10 +3,22 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 
-GITHUB_STATUS_URL = "https://www.githubstatus.com"
-GITHUB_STATUS_API = f"{GITHUB_STATUS_URL}/api/v2/status.json"
-GITHUB_INCIDENTS_API = f"{GITHUB_STATUS_URL}/api/v2/incidents.json"
 WINDOW_DAYS = 30
+
+STATUSPAGE_SERVICES = {
+    "atlassian": ("Atlassian", "https://status.atlassian.com"),
+    "cloudflare": ("Cloudflare", "https://www.cloudflarestatus.com"),
+    "datadog": ("Datadog US1", "https://status.datadoghq.com"),
+    "digitalocean": ("DigitalOcean", "https://status.digitalocean.com"),
+    "discord": ("Discord", "https://discordstatus.com"),
+    "github": ("GitHub", "https://www.githubstatus.com"),
+    "npm": ("npm", "https://status.npmjs.org"),
+    "openai": ("OpenAI", "https://status.openai.com"),
+}
+
+
+def supported_services() -> str:
+    return ", ".join(STATUSPAGE_SERVICES)
 
 
 def parse_timestamp(value: str) -> datetime:
@@ -44,14 +56,16 @@ def estimated_uptime(incidents: list[dict], now: datetime) -> float:
 
 async def statusfunctx(ctx, service: str):
     service = service.strip().lower()
-    if service != "github":
-        await ctx.send("Servicio no soportado. Servicios disponibles: github")
+    definition = STATUSPAGE_SERVICES.get(service)
+    if not definition:
+        await ctx.send(f"Servicio no soportado. Servicios disponibles: {supported_services()}")
         return
 
+    display_name, status_url = definition
     try:
-        status_response = requests.get(GITHUB_STATUS_API, timeout=10)
+        status_response = requests.get(f"{status_url}/api/v2/status.json", timeout=10)
         status_response.raise_for_status()
-        incidents_response = requests.get(GITHUB_INCIDENTS_API, timeout=10)
+        incidents_response = requests.get(f"{status_url}/api/v2/incidents.json", timeout=10)
         incidents_response.raise_for_status()
 
         status = status_response.json()["status"]
@@ -60,8 +74,8 @@ async def statusfunctx(ctx, service: str):
         indicator = status.get("indicator", "unknown")
         state = "UP" if indicator == "none" else f"DEGRADADO ({status.get('description', 'estado desconocido')})"
         await ctx.send(
-            f"GitHub: {state} - Uptime estimado ultimos 30 dias: {uptime:.3f}% "
-            f"- Fuente: {GITHUB_STATUS_URL}"
+            f"{display_name}: {state} - Uptime estimado ultimos 30 dias: {uptime:.3f}% "
+            f"- Fuente: {status_url}"
         )
     except (requests.RequestException, KeyError, TypeError, ValueError):
-        await ctx.send("No se pudo consultar el estado de GitHub. Intenta nuevamente mas tarde.")
+        await ctx.send(f"No se pudo consultar el estado de {display_name}. Intenta nuevamente mas tarde.")
