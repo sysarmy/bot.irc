@@ -39,7 +39,7 @@ async def karmawordfunctx(ctx, text):
     cursor = database.cursor()
     
     # Chequea si la palabra esta en la base
-    SQL_check = "SELECT EXISTS(SELECT 1 FROM karma WHERE palabra = ?)"
+    SQL_check = "SELECT EXISTS(SELECT 1 FROM karma WHERE LOWER(palabra) = LOWER(?))"
     cursor.execute(SQL_check, (text,))
     palabra_existe = cursor.fetchone()[0]
     
@@ -48,7 +48,7 @@ async def karmawordfunctx(ctx, text):
     else:
         
         # Se manda mensaje
-        SQL = "SELECT karmavalue FROM karma WHERE palabra = ?"
+        SQL = "SELECT karmavalue FROM karma WHERE LOWER(palabra) = LOWER(?)"
         cursor.execute(SQL, (text,))
         karma_value = cursor.fetchone()[0]
         await ctx.send(f"**{text}** tiene {karma_value} karma.")
