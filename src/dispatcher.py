@@ -33,6 +33,9 @@ class CommandContext:
     async def send(self, message: str) -> None:
         await self.client.send_message(self.target, str(message))
 
+    async def send_unicode(self, message: str) -> None:
+        await self.client.send_message(self.target, str(message), ascii_only=False)
+
 
 COMMANDS = {
     "birras": (birrasfunctx, 0), "caucho": (cauchofunctx, 0),
@@ -65,10 +68,11 @@ async def dispatch(ctx: CommandContext, content: str) -> None:
         await ctx.send("Pong!")
         return
     if command == "flip":
-        await ctx.send("`(╯°□°）╯︵ ┻━┻`")
+        await ctx.send_unicode("(╯°□°）╯︵ ┻━┻")
         return
     if command == "shrug":
-        await ctx.send("`¯\\_(\ツ)_/¯`")
+        # Discord needs \\ for the visible slash and \_ to escape Markdown.
+        await ctx.send_unicode(r"¯\\\_(ツ)\_/¯")
         return
 
     definition = COMMANDS.get(command)

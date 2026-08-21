@@ -60,9 +60,10 @@ class IRCBot:
         self.writer.write((line + "\r\n").encode("utf-8"))
         await self.writer.drain()
 
-    async def send_message(self, target: str, message: str) -> None:
+    async def send_message(self, target: str, message: str, ascii_only: bool = True) -> None:
         # Keep ample room for IRC command/target overhead within the 512-byte limit.
-        message = ascii_message(message)
+        if ascii_only:
+            message = ascii_message(message)
         chunks = []
         for logical_line in message.replace("\r", "").split("\n"):
             current = ""
