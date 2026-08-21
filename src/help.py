@@ -29,7 +29,7 @@ COMMAND_HELP = {
 
 
 GENERAL_HELP = """Estos son los comandos disponibles en el bot de Sysarmy:
-Economia: !caucho !cripto !dolar !euro !pesos | Servicios: !clima !fulbo !subte !underground | Feriados: !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy | Karma: !rank !karma !kgivers !kgiven | Citas: !q !qadd !qsearch | Comunidad: !birras | Utilidades: !ping !flip !shrug
+!rank !karma !kgivers !kgiven | !q !qadd !qsearch | !caucho !cripto !dolar !euro !pesos | !clima !fulbo !subte !underground | !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy | !birras | !ping !flip !shrug
 Ejecuta !help <comando> para ver mas informacion. Ejemplo: !help karma"""
 
 
