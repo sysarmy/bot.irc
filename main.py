@@ -10,6 +10,7 @@ from src.bridge import message_identity
 from src.database import initialize_databases
 from src.dispatcher import CommandContext, dispatch
 from src.karma import process_karma
+from src.text import ascii_message
 from src.yelling import has_lowercase_word, random_response
 
 
@@ -61,6 +62,7 @@ class IRCBot:
 
     async def send_message(self, target: str, message: str) -> None:
         # Keep ample room for IRC command/target overhead within the 512-byte limit.
+        message = ascii_message(message)
         chunks = []
         for logical_line in message.replace("\r", "").split("\n"):
             current = ""
