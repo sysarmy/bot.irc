@@ -65,10 +65,10 @@ async def dispatch(ctx: CommandContext, content: str) -> None:
         await ctx.send("Pong!")
         return
     if command == "flip":
-        await ctx.send("(╯°□°）╯︵ ┻━┻")
+        await ctx.send("(table flip) (/o_o)/  ====|____|")
         return
     if command == "shrug":
-        await ctx.send("¯\\_(ツ)_/¯")
+        await ctx.send("\\_(o_o)_/")
         return
 
     definition = COMMANDS.get(command)
