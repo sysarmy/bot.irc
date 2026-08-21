@@ -5,5 +5,7 @@ services:
     env_file:
       - .env
     volumes:
+      - ./main.py:/app/main.py:ro
+      - ./src:/app/src:ro
       - ./db:/app/db
     restart: unless-stopped

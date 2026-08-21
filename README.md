@@ -16,7 +16,23 @@ Discord-only slash commands, reactions, member synchronization, embeds, job foru
    ```
 
 The complete `db/` directory is mounted at `/app/db`; SQLite updates persist on the host. If a database is absent, the bot creates a compatible empty one.
+`main.py` and `src/` are also mounted read-only, so after pulling code changes only restart the bot:
+
+```sh
+git pull
+docker compose restart bot
+```
+
+Rebuild with `docker compose up --build -d` only when `requirements.txt` or the Dockerfile changes.
 On Linux, set `PUID` and `PGID` in `.env` to the owner of the `db/` directory so SQLite remains writable.
+
+To join multiple channels, list them comma-separated in `.env`:
+
+```dotenv
+IRC_CHANNELS="#sysarmy,#sysarmy-offtopic,#jobs"
+```
+
+The bot joins every listed channel and replies in the channel where each command was received.
 
 ## Identity and karma
 
