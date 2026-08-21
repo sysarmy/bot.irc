@@ -3,7 +3,7 @@ import re
 from src.database import karma_database
 
 
-KARMA_TOKEN = re.compile(r"^([a-zA-Z0-9_\-\[\]\\`^{}|ñÑáéíóúÁÉÍÓÚ]+)(\+\+|--)[,.!?;:]*$")
+KARMA_TOKEN = re.compile(r"^([a-zA-Z0-9_\-\[\]\\`^{}|ñÑáéíóúÁÉÍÓÚ][a-zA-Z0-9_+\-\[\]\\`^{}|ñÑáéíóúÁÉÍÓÚ]*)(\+\+|--)[,.!?;:]*$")
 
 
 def process_karma(message: str, giver: str) -> list[str]:

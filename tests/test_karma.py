@@ -41,6 +41,21 @@ class KarmaTests(unittest.TestCase):
     def test_non_karma_text_is_ignored(self):
         self.assertEqual(src.karma.process_karma("hello from IRC", "emilio"), [])
 
+    def test_cpp_can_receive_karma(self):
+        replies = src.karma.process_karma("c++++", "emilio")
+
+        with sqlite3.connect(src.database.KARMA_DB) as database:
+            value = database.execute(
+                "SELECT karmavalue FROM karma WHERE palabra = 'c++'"
+            ).fetchone()[0]
+
+        self.assertEqual(value, 1)
+        self.assertEqual(replies, ["+1 karma para c++. Current karma is: 1"])
+
+    def test_regular_karma_syntax_still_works(self):
+        replies = src.karma.process_karma("linux++", "emilio")
+        self.assertEqual(replies, ["+1 karma para linux. Current karma is: 1"])
+
 
 if __name__ == "__main__":
     unittest.main()
