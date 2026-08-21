@@ -21,8 +21,11 @@ class OutgoingTextTests(unittest.TestCase):
         self.assertTrue(result.isascii())
 
     def test_ascii_emoticons_survive_unchanged(self):
-        self.assertEqual(ascii_message("(table flip) (/o_o)/  ====|____|"), "(table flip) (/o_o)/  ====|____|")
-        self.assertEqual(ascii_message("\\_(o_o)_/"), "\\_(o_o)_/")
+        self.assertEqual(
+            ascii_message("`(table flip) (/o_o)/  ====|____|`"),
+            "`(table flip) (/o_o)/  ====|____|`",
+        )
+        self.assertEqual(ascii_message("`\\_(o_o)_/`"), "`\\_(o_o)_/`")
 
 
 if __name__ == "__main__":
