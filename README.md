@@ -24,6 +24,8 @@ When the server supports IRCv3 `account-tag`, the authenticated account name is 
 
 Do not run this bot with the same nickname as a connected Matterbridge instance: IRC nicknames must be unique. Many networks allow the same NickServ/SASL account to have multiple concurrent connections with distinct nicknames, but this depends on network policy.
 
+Matterbridge messages in the form `<username> !command` are supported when they come from a configured bridge nickname. `IRC_BRIDGE_NICKS` is a comma-separated list and defaults to `nbot`; the relayed username is used as the command and karma identity.
+
 ## Commands
 
 Run `!help` for the current list. The migrated commands are `birras`, `caucho`, `clima`, `cripto`, `dolar`, `euro`, country holiday commands, `fulbo`, karma/ranking commands, peso conversion, quotes, `subte`, `underground`, and the small utility commands.

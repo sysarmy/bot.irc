@@ -6,6 +6,7 @@ import ssl
 
 from dotenv import load_dotenv
 
+from src.bridge import message_identity
 from src.database import initialize_databases
 from src.dispatcher import CommandContext, dispatch
 from src.karma import process_karma
@@ -32,6 +33,11 @@ class IRCBot:
         self.username = os.getenv("IRC_USERNAME", self.nickname)
         self.realname = os.getenv("IRC_REALNAME", "Sysarmy BOFH IRC bot")
         self.channels = [item.strip() for item in os.environ["IRC_CHANNELS"].split(",") if item.strip()]
+        self.bridge_nicks = {
+            item.strip().lower()
+            for item in os.getenv("IRC_BRIDGE_NICKS", "nbot").split(",")
+            if item.strip()
+        }
         self.server_password = os.getenv("IRC_SERVER_PASSWORD")
         self.sasl_username = os.getenv("IRC_SASL_USERNAME")
         self.sasl_password = os.getenv("IRC_SASL_PASSWORD")
@@ -121,6 +127,7 @@ class IRCBot:
                 return
             account = tags.get("account")
             identity = account if account and account != "*" else nick
+            identity, content = message_identity(nick, identity, content, self.bridge_nicks)
             response_target = nick if target.lower() == self.nickname.lower() else target
             ctx = CommandContext(author=identity, target=response_target, client=self)
             for reply in process_karma(content, identity):
