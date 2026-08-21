@@ -42,6 +42,10 @@ Do not run this bot with the same nickname as a connected Matterbridge instance:
 
 Matterbridge messages in the form `<username> !command` are supported when they come from a configured bridge nickname. `IRC_BRIDGE_NICKS` is a comma-separated list and defaults to `nbot`; the relayed username is used as the command and karma identity.
 
+## Yelling channel
+
+`IRC_YELLING_CHANNELS` is a comma-separated list that defaults to `#sysarmy-yelling`. Messages containing lowercase words receive a random all-caps reminder. URLs and `:emoji:` tokens are ignored. Matterbridge messages are checked after extracting their Discord or Slack username and content.
+
 ## Commands
 
 Run `!help` for the current list. The migrated commands are `birras`, `caucho`, `clima`, `cripto`, `dolar`, `euro`, country holiday commands, `fulbo`, karma/ranking commands, peso conversion, quotes, `subte`, `underground`, and the small utility commands.

@@ -10,6 +10,7 @@ from src.bridge import message_identity
 from src.database import initialize_databases
 from src.dispatcher import CommandContext, dispatch
 from src.karma import process_karma
+from src.yelling import has_lowercase_word, random_response
 
 
 load_dotenv()
@@ -36,6 +37,11 @@ class IRCBot:
         self.bridge_nicks = {
             item.strip().lower()
             for item in os.getenv("IRC_BRIDGE_NICKS", "nbot").split(",")
+            if item.strip()
+        }
+        self.yelling_channels = {
+            item.strip().lower()
+            for item in os.getenv("IRC_YELLING_CHANNELS", "#sysarmy-yelling").split(",")
             if item.strip()
         }
         self.server_password = os.getenv("IRC_SERVER_PASSWORD")
@@ -130,6 +136,8 @@ class IRCBot:
             identity, content = message_identity(nick, identity, content, self.bridge_nicks)
             response_target = nick if target.lower() == self.nickname.lower() else target
             ctx = CommandContext(author=identity, target=response_target, client=self)
+            if target.lower() in self.yelling_channels and has_lowercase_word(content):
+                await ctx.send(f"{identity}: {random_response()}")
             for reply in process_karma(content, identity):
                 await ctx.send(reply)
             await dispatch(ctx, content)
