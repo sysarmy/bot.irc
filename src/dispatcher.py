@@ -68,7 +68,7 @@ async def dispatch(ctx: CommandContext, content: str) -> None:
         await ctx.send("`(╯°□°）╯︵ ┻━┻`")
         return
     if command == "shrug":
-        await ctx.send("`¯\\_(ツ)_/¯`")
+        await ctx.send("`¯\\_(\ツ)_/¯`")
         return
 
     definition = COMMANDS.get(command)
