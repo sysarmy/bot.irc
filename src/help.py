@@ -28,15 +28,7 @@ COMMAND_HELP = {
 }
 
 
-GENERAL_HELP = """Comandos del bot de Sysarmy:
-Economía: !caucho !cripto !dolar !euro !pesos
-Servicios: !clima !fulbo !subte !underground
-Feriados: !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy
-Karma: !rank !karma !kgivers !kgiven
-Citas: !q !qadd !qsearch
-Comunidad: !birras
-Utilidades: !ping !flip !shrug
-Ejecutá !help <comando> para ver más información. Ejemplo: !help clima"""
+GENERAL_HELP = "Comandos: !birras !caucho !clima !cripto !dolar !euro !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy !fulbo !rank !karma !kgivers !kgiven !pesos !q !qadd !qsearch !subte !underground !ping !flip !shrug. Ejecutá !help <comando> para ver más información. Ejemplo: !help karma"
 
 
 def help_message(argument: str = "") -> str:

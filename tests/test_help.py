@@ -4,10 +4,14 @@ from src.help import help_message
 
 
 class HelpTests(unittest.TestCase):
-    def test_general_help_groups_commands_and_explains_detailed_help(self):
+    def test_general_help_is_one_line_and_explains_detailed_help(self):
         message = help_message()
-        self.assertIn("Economía:", message)
-        self.assertIn("!help <comando>", message)
+        self.assertNotIn("\n", message)
+        self.assertTrue(
+            message.endswith(
+                "Ejecutá !help <comando> para ver más información. Ejemplo: !help karma"
+            )
+        )
 
     def test_command_help_is_case_insensitive(self):
         self.assertEqual(help_message("CLIMA"), help_message("clima"))
