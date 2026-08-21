@@ -27,6 +27,16 @@ COMMAND_HELP = {
     "help": "!help [comando] - Muestra la lista de comandos o ayuda detallada. Ejemplo: !help clima",
 }
 
+REQUIRED_ARGUMENTS = {
+    "clima": "ciudad",
+    "fulbo": "liga",
+    "karma": "palabra o usuario",
+    "kgiven": "usuario",
+    "pesos": "monto",
+    "qadd": "cita",
+    "qsearch": "texto",
+}
+
 
 GENERAL_HELP = """Estos son los comandos disponibles en el bot de Sysarmy:
 !rank !karma !kgivers !kgiven | !q !qadd !qsearch | !caucho !cripto !dolar !euro !pesos | !clima !fulbo !subte !underground | !feriadoar !feriadocl !feriadoes !feriadomx !feriadouy | !birras | !ping !flip !shrug
@@ -41,3 +51,8 @@ def help_message(argument: str = "") -> str:
     if detail:
         return detail
     return f"No hay ayuda para '{command}'. Ejecuta !help para ver los comandos disponibles."
+
+
+def missing_argument_message(command: str) -> str:
+    argument = REQUIRED_ARGUMENTS.get(command, "argumento")
+    return f"Falta el argumento <{argument}>. Uso: !{command} <{argument}>"

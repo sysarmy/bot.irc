@@ -1,6 +1,6 @@
 import unittest
 
-from src.help import help_message
+from src.help import REQUIRED_ARGUMENTS, help_message, missing_argument_message
 
 
 class HelpTests(unittest.TestCase):
@@ -26,6 +26,13 @@ class HelpTests(unittest.TestCase):
 
     def test_unknown_command_has_a_clear_response(self):
         self.assertIn("No hay ayuda", help_message("inexistente"))
+
+    def test_required_commands_identify_the_missing_argument(self):
+        for command, argument in REQUIRED_ARGUMENTS.items():
+            self.assertEqual(
+                missing_argument_message(command),
+                f"Falta el argumento <{argument}>. Uso: !{command} <{argument}>",
+            )
 
 
 if __name__ == "__main__":

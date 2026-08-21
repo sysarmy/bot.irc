@@ -18,7 +18,7 @@ from src.commands.ctxpesos import pesosfunctx
 from src.commands.ctxquote import qsearchfunctx, quoteaddfunctx, quotefunctx
 from src.commands.ctxsubte import subtefunctx
 from src.commands.ctxunderground import undergroundfunctx
-from src.help import help_message
+from src.help import help_message, missing_argument_message
 
 
 LOGGER = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class CommandContext:
 COMMANDS = {
     "birras": (birrasfunctx, 0), "caucho": (cauchofunctx, 0),
     "clima": (climafunctx, 1), "cripto": (criptofunctx, 0),
-    "dolar": (dolarfunctx, -1), "euro": (eurofunctx, 0),
+    "dolar": (dolarfunctx, -1), "dolor": (dolarfunctx, -1), "euro": (eurofunctx, 0),
     "feriadoar": (feriadoarfunctx, 0), "feriadocl": (feriadoclfunctx, 0),
     "feriadoes": (feriadoesfunctx, 0), "feriadomx": (feriadomxfunctx, 0),
     "feriadouy": (feriadouyfunctx, 0), "fulbo": (fulbofunctx, 1),
@@ -77,7 +77,7 @@ async def dispatch(ctx: CommandContext, content: str) -> None:
         return
     handler, required_args = definition
     if required_args == 1 and not argument:
-        await ctx.send(f"Falta un argumento para !{command}")
+        await ctx.send(missing_argument_message(command))
         return
 
     try:
