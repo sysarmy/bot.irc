@@ -1,17 +1,23 @@
 from datetime import datetime, timezone, timedelta
+import asyncio
 import requests
 from ics import Calendar
 import re
+
 
 async def birrasfunctx(ctx):
     FechaActual = datetime.now(timezone.utc)
 
     # Fetch the URL of the public calendar
-    response = requests.get("https://calendar.google.com/calendar/u/0/ical/c_ntsrg10qsjmfeshhgap8ane1ss%40group.calendar.google.com/public/basic.ics")
+    response = await asyncio.to_thread(
+        requests.get,
+        "https://calendar.google.com/calendar/u/0/ical/c_ntsrg10qsjmfeshhgap8ane1ss%40group.calendar.google.com/public/basic.ics",
+        timeout=15,
+    )
     calendar = Calendar(response.text)
 
     eventosformateados = ""
-    
+
     for event in calendar.events:
         # Convertimos las timezones para poder compararlas
         evento_UTC = event.begin.datetime.astimezone(timezone.utc)
@@ -20,11 +26,13 @@ async def birrasfunctx(ctx):
         if evento_UTC > FechaActual:
 
             # Limpiamos el codigo feo que mete Google Calendar + sacamos la referencia del adminbirrator
-            description = re.sub(r'<a href=\'(.*?)\'>.*?</a>', r'\1', event.description)
-            description = re.sub(r'^Evento creado por https://github.com/sysarmy/disneyland/tree/master/adminbirrator 🍻$', '', description, flags=re.MULTILINE)
+            description = re.sub(r"<a href=\'(.*?)\'>.*?</a>", r"\1", event.description)
+            description = re.sub(
+                r"^Evento creado por https://github.com/sysarmy/disneyland/tree/master/adminbirrator 🍻$", "", description, flags=re.MULTILINE
+            )
 
             # Busca 'birras' en el evento
-            if 'birras' in event.name.lower() or 'birras' in description.lower():
+            if "birras" in event.name.lower() or "birras" in description.lower():
                 # Formateo de fecha
                 fechaformateada = evento_GMT3.strftime("%d-%m-%Y %H:%M")
 

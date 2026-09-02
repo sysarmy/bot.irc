@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
+import asyncio
 import requests
-
 
 WINDOW_DAYS = 30
 
@@ -63,9 +63,9 @@ async def statusfunctx(ctx, service: str):
 
     display_name, status_url = definition
     try:
-        status_response = requests.get(f"{status_url}/api/v2/status.json", timeout=10)
+        status_response = await asyncio.to_thread(requests.get, f"{status_url}/api/v2/status.json", timeout=10)
         status_response.raise_for_status()
-        incidents_response = requests.get(f"{status_url}/api/v2/incidents.json", timeout=10)
+        incidents_response = await asyncio.to_thread(requests.get, f"{status_url}/api/v2/incidents.json", timeout=10)
         incidents_response.raise_for_status()
 
         status = status_response.json()["status"]
@@ -73,9 +73,6 @@ async def statusfunctx(ctx, service: str):
         uptime = estimated_uptime(incidents, datetime.now(timezone.utc))
         indicator = status.get("indicator", "unknown")
         state = "UP" if indicator == "none" else f"DEGRADADO ({status.get('description', 'estado desconocido')})"
-        await ctx.send(
-            f"{display_name}: {state} - Uptime estimado ultimos 30 dias: {uptime:.3f}% "
-            f"- Fuente: {status_url}"
-        )
+        await ctx.send(f"{display_name}: {state} - Uptime estimado ultimos 30 dias: {uptime:.3f}% " f"- Fuente: {status_url}")
     except (requests.RequestException, KeyError, TypeError, ValueError):
         await ctx.send(f"No se pudo consultar el estado de {display_name}. Intenta nuevamente mas tarde.")

@@ -1,4 +1,5 @@
 import requests
+import asyncio
 from datetime import datetime
 import json
 from ratelimit import limits
@@ -8,30 +9,31 @@ from dotenv import load_dotenv
 quince_minutos = 900
 load_dotenv()
 
+
 # Limitamos las API calls por las dudas. Esta libreria es medio negra. Lo dejamos asi por ahora, Mariano del futuro lo va a hacer manual
 @limits(calls=15, period=quince_minutos)
 async def criptofunctx(ctx):
     FechaActual = datetime.now()
-  
+
     try:
         # Llama a la API
-        COIN_key = os.getenv('COIN_key')
+        COIN_key = os.getenv("COIN_key")
 
-        url = 'https://api.coinranking.com/v2/coins'
-        response = requests.get(url, headers={'Authorization': f'Bearer {COIN_key}'})
-            
+        url = "https://api.coinranking.com/v2/coins"
+        response = await asyncio.to_thread(requests.get, url, headers={"Authorization": f"Bearer {COIN_key}"}, timeout=15)
+
         if response.status_code == 200:
-           
+
             # Carga el JSON en Python dictionaro
-            json_cripto = json.loads(response.text)          
+            json_cripto = json.loads(response.text)
             preciomoneda = []
-                    
+
             # Recorre el JSON y trate la info de las monedas que elegimos. Appendea en una lista para mostrar
-            for coin in json_cripto['data']['coins']:
-                if coin['symbol'] in ["BTC", "ETH", "LTC", "USDT", "SHIB", "DOGE", "SOL", "BSV", "BCH"]:
-                    nombre = coin["name"],
-                    precio = coin["price"],
-                    simbolo = coin["symbol"],
+            for coin in json_cripto["data"]["coins"]:
+                if coin["symbol"] in ["BTC", "ETH", "LTC", "USDT", "SHIB", "DOGE", "SOL", "BSV", "BCH"]:
+                    nombre = (coin["name"],)
+                    precio = (coin["price"],)
+                    simbolo = (coin["symbol"],)
                     moneda = {"nombre": nombre, "precio": precio, "simbolo": simbolo}
                     preciomoneda.append(moneda)
 
@@ -40,11 +42,11 @@ async def criptofunctx(ctx):
             print(f"Se ha ejecutado el comando cripto")
 
             # Se crea el mensaje ctx para mandar
-            mensaje = 'La timba! 🚀 🌕\n'
+            mensaje = "La timba! 🚀 🌕\n"
             for moneda in preciomoneda:
                 mensaje += f"{moneda['nombre'][0]} -  ({moneda['simbolo'][0]}) USD = {round(float(moneda['precio'][0]),3)}\n"
 
-            await ctx.send(mensaje)      
+            await ctx.send(mensaje)
 
     except Exception as e:
         print(f"Error en la API: {e}")

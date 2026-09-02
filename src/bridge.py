@@ -1,6 +1,5 @@
 import re
 
-
 BRIDGED_MESSAGE_RE = re.compile(r"^<([^>]+)>\s+(.*)$", re.DOTALL)
 
 

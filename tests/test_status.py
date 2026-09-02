@@ -27,16 +27,12 @@ class StatusTests(unittest.IsolatedAsyncioTestCase):
 
         await statusfunctx(ctx, "gitlab")
 
-        ctx.send.assert_awaited_once_with(
-            f"Servicio no soportado. Servicios disponibles: {supported_services()}"
-        )
+        ctx.send.assert_awaited_once_with(f"Servicio no soportado. Servicios disponibles: {supported_services()}")
 
     async def test_statuspage_service_uses_its_configured_endpoints(self):
         status_response = Mock()
         status_response.raise_for_status.return_value = None
-        status_response.json.return_value = {
-            "status": {"indicator": "none", "description": "All Systems Operational"}
-        }
+        status_response.json.return_value = {"status": {"indicator": "none", "description": "All Systems Operational"}}
         incidents_response = Mock()
         incidents_response.raise_for_status.return_value = None
         incidents_response.json.return_value = {"incidents": []}

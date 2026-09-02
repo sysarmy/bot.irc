@@ -1,7 +1,6 @@
 import random
 import re
 
-
 URL_AND_EMOJI_RE = re.compile(r"https?://\S+|:[^:]+:")
 LOWERCASE_WORD_RE = re.compile(r"\b[a-z]+\b")
 

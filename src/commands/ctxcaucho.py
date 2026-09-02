@@ -1,10 +1,12 @@
 import requests
+import asyncio
 from datetime import datetime
 import json
 from ratelimit import limits
 from bs4 import BeautifulSoup
 
 quince_minutos = 900
+
 
 # Limitamos las API calls por las dudas. Esta libreria es medio negra. Lo dejamos asi por ahora, Mariano del futuro lo va a hacer manual
 @limits(calls=15, period=quince_minutos)
@@ -14,20 +16,19 @@ async def cauchofunctx(ctx):
     CAUCIONES_IOL_URL = "https://iol.invertironline.com/mercado/cotizaciones/argentina/cauciones"
     HEADERS = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-        "Accept-Language": "es-AR,es;q=0.9"
+        "Accept-Language": "es-AR,es;q=0.9",
     }
 
     try:
-        r = requests.get(CAUCIONES_IOL_URL, headers=HEADERS, timeout=10)
+        r = await asyncio.to_thread(requests.get, CAUCIONES_IOL_URL, headers=HEADERS, timeout=10)
         r.raise_for_status()
 
         soup = BeautifulSoup(r.text, "html.parser")
         tabla = soup.find("table", {"id": "cotizaciones"})
-            
+
         if not tabla:
             print("No se encontró la tabla de cotizaciones.")
             return
-
 
         # Log
         print(FechaActual)
@@ -59,7 +60,7 @@ async def cauchofunctx(ctx):
 
             cauciones.append({"dias": plazo, "tasa": tasa})
 
-        if not cauciones:                
+        if not cauciones:
             print("No se encontraron cauciones en pesos con tasa válida.")
             return
 
@@ -69,11 +70,9 @@ async def cauchofunctx(ctx):
 
         for c in cauciones:
             mensaje += f"{c['dias']} días --> TNA: {c['tasa']} %\n"
-        
+
         await ctx.send(mensaje)
 
     except Exception as e:
         print(f"Error en la web: {e}")
         await ctx.send(f"Error. Pincho la API. Error")
-    
-    

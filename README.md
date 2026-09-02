@@ -34,6 +34,18 @@ IRC_CHANNELS="#sysarmy,#sysarmy-offtopic,#jobs"
 
 The bot joins every listed channel and replies in the channel where each command was received.
 
+## Libera.Chat operation
+
+Use TLS and SASL, register a separate account for the bot, and set `IRC_REALNAME` so the
+bot is clearly identified and an administrator can be contacted. Obtain permission from
+the operators of every configured channel before adding it to `IRC_CHANNELS`.
+
+The client answers server pings independently of slow command APIs, probes silent
+connections, reconnects with exponential backoff and jitter, and rejoins the configured
+channels after a connection loss. It deliberately does not immediately rejoin after a
+channel operator kicks it. Outbound messages are serialized at one every 2.1 seconds to
+stay within Libera.Chat's normal message rate.
+
 ## Identity and karma
 
 When the server supports IRCv3 `account-tag`, the authenticated account name is recorded as the karma giver. Otherwise the bot falls back to the current nickname. SASL is therefore recommended.

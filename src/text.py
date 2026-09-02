@@ -1,17 +1,18 @@
 import re
 import unicodedata
 
-
 NON_WHITESPACE_RE = re.compile(r"\S+")
-ASCII_REPLACEMENTS = str.maketrans({
-    "—": "-",
-    "–": "-",
-    "‘": "'",
-    "’": "'",
-    "“": '"',
-    "”": '"',
-    "…": "...",
-})
+ASCII_REPLACEMENTS = str.maketrans(
+    {
+        "—": "-",
+        "–": "-",
+        "‘": "'",
+        "’": "'",
+        "“": '"',
+        "”": '"',
+        "…": "...",
+    }
+)
 
 
 def _repair_mojibake_word(match: re.Match[str]) -> str:

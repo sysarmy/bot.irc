@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, patch
 
 from src.commands.ctxkarma import karmagiversuserfunctx, karmawordfunctx
 
-
 REAL_CONNECT = sqlite3.connect
 
 
@@ -15,12 +14,8 @@ class KarmaCommandTests(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             database_path = os.path.join(tempdir, "karma.db")
             with REAL_CONNECT(database_path) as database:
-                database.execute(
-                    "CREATE TABLE karma (palabra TEXT, karmavalue INTEGER, isuser TEXT, karmagiven INTEGER)"
-                )
-                database.execute(
-                    "INSERT INTO karma VALUES ('Nachi', 42, 'YES', 7)"
-                )
+                database.execute("CREATE TABLE karma (palabra TEXT, karmavalue INTEGER, isuser TEXT, karmagiven INTEGER)")
+                database.execute("INSERT INTO karma VALUES ('Nachi', 42, 'YES', 7)")
 
             ctx = unittest.mock.Mock()
             ctx.send = AsyncMock()
@@ -43,12 +38,8 @@ class KarmaCommandTests(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             database_path = os.path.join(tempdir, "karma.db")
             with REAL_CONNECT(database_path) as database:
-                database.execute(
-                    "CREATE TABLE karma (palabra TEXT, karmavalue INTEGER, isuser TEXT, karmagiven INTEGER)"
-                )
-                database.execute(
-                    "INSERT INTO karma VALUES ('Nachichuri', 0, 'YES', 7)"
-                )
+                database.execute("CREATE TABLE karma (palabra TEXT, karmavalue INTEGER, isuser TEXT, karmagiven INTEGER)")
+                database.execute("INSERT INTO karma VALUES ('Nachichuri', 0, 'YES', 7)")
 
             ctx = unittest.mock.Mock()
             ctx.send = AsyncMock()

@@ -2,7 +2,6 @@ import re
 
 from src.database import karma_database
 
-
 KARMA_TOKEN = re.compile(r"^([a-zA-Z0-9_\-\[\]\\`^{}|ñÑáéíóúÁÉÍÓÚ][a-zA-Z0-9_+\-\[\]\\`^{}|ñÑáéíóúÁÉÍÓÚ]*)(\+\+|--)[,.!?;:]*$")
 
 

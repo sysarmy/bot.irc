@@ -13,20 +13,20 @@ load_dotenv()
 async def climafunctx(ctx, city):
 
     FechaActual = datetime.now()
-    
+
     try:
-        url = "http://api.weatherapi.com/v1/current.json" 
-        CLIMA_key = os.getenv('WEATHER_key')
-        params = {"key": f"{CLIMA_key}","q": city} 
-        
+        url = "http://api.weatherapi.com/v1/current.json"
+        CLIMA_key = os.getenv("WEATHER_key")
+        params = {"key": f"{CLIMA_key}", "q": city}
+
         # Llama a la API y trae la data
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, params=params) as res: # <-- Necesitamos la ciudad para checkear el clima en la API
+            async with session.get(url, params=params) as res:  # <-- Necesitamos la ciudad para checkear el clima en la API
                 data = await res.json()
                 if res.status == 200:
-                    
-                    if("error" in data):
-                        await ctx.send('Error - No reconozco la ciudad')
+
+                    if "error" in data:
+                        await ctx.send("Error - No reconozco la ciudad")
 
                     location = data["location"]["name"]
                     country = data["location"]["country"]
@@ -42,10 +42,10 @@ async def climafunctx(ctx, city):
                     print(f"Se ha ejecutado el comando clima")
 
                     # Se crea el embed con los campos del clima
-                    await ctx.send(f'El clima en {location}, {country} es {temp_c} °C, sensación termica {feelslike_c} °C, humedad {humidity} %')
+                    await ctx.send(f"El clima en {location}, {country} es {temp_c} °C, sensación termica {feelslike_c} °C, humedad {humidity} %")
 
     except:
-        
+
         # En caso de error en la API, se imprime el mensaje
-        await ctx.send('Error en la API call - avisar a algun root')
+        await ctx.send("Error en la API call - avisar a algun root")
         print("Error en la API")

@@ -21,19 +21,13 @@ class KarmaTests(unittest.TestCase):
 
     def test_existing_karma_database_is_updated(self):
         with sqlite3.connect(src.database.KARMA_DB) as database:
-            database.execute(
-                "INSERT INTO karma (palabra, karmavalue, isuser, karmagiven) VALUES ('linux', 41, 'NO', 0)"
-            )
+            database.execute("INSERT INTO karma (palabra, karmavalue, isuser, karmagiven) VALUES ('linux', 41, 'NO', 0)")
 
         replies = src.karma.process_karma("linux++", "emilio")
 
         with sqlite3.connect(src.database.KARMA_DB) as database:
-            value = database.execute(
-                "SELECT karmavalue FROM karma WHERE palabra = 'linux'"
-            ).fetchone()[0]
-            given = database.execute(
-                "SELECT karmagiven FROM karma WHERE palabra = 'emilio' AND isuser = 'YES'"
-            ).fetchone()[0]
+            value = database.execute("SELECT karmavalue FROM karma WHERE palabra = 'linux'").fetchone()[0]
+            given = database.execute("SELECT karmagiven FROM karma WHERE palabra = 'emilio' AND isuser = 'YES'").fetchone()[0]
         self.assertEqual(value, 42)
         self.assertEqual(given, 1)
         self.assertEqual(replies, ["+1 karma para linux. Current karma is: 42"])
@@ -45,9 +39,7 @@ class KarmaTests(unittest.TestCase):
         replies = src.karma.process_karma("c++++", "emilio")
 
         with sqlite3.connect(src.database.KARMA_DB) as database:
-            value = database.execute(
-                "SELECT karmavalue FROM karma WHERE palabra = 'c++'"
-            ).fetchone()[0]
+            value = database.execute("SELECT karmavalue FROM karma WHERE palabra = 'c++'").fetchone()[0]
 
         self.assertEqual(value, 1)
         self.assertEqual(replies, ["+1 karma para c++. Current karma is: 1"])

@@ -2,7 +2,9 @@ import asyncio
 import base64
 import logging
 import os
+import random
 import ssl
+import time
 
 from dotenv import load_dotenv
 
@@ -12,7 +14,6 @@ from src.dispatcher import CommandContext, dispatch
 from src.karma import process_karma
 from src.text import ascii_message
 from src.yelling import has_lowercase_word, random_response
-
 
 load_dotenv()
 logging.basicConfig(
@@ -35,16 +36,8 @@ class IRCBot:
         self.username = os.getenv("IRC_USERNAME", self.nickname)
         self.realname = os.getenv("IRC_REALNAME", "Sysarmy BOFH IRC bot")
         self.channels = [item.strip() for item in os.environ["IRC_CHANNELS"].split(",") if item.strip()]
-        self.bridge_nicks = {
-            item.strip().lower()
-            for item in os.getenv("IRC_BRIDGE_NICKS", "nbot").split(",")
-            if item.strip()
-        }
-        self.yelling_channels = {
-            item.strip().lower()
-            for item in os.getenv("IRC_YELLING_CHANNELS", "#sysarmy-yelling").split(",")
-            if item.strip()
-        }
+        self.bridge_nicks = {item.strip().lower() for item in os.getenv("IRC_BRIDGE_NICKS", "nbot").split(",") if item.strip()}
+        self.yelling_channels = {item.strip().lower() for item in os.getenv("IRC_YELLING_CHANNELS", "#sysarmy-yelling").split(",") if item.strip()}
         self.server_password = os.getenv("IRC_SERVER_PASSWORD")
         self.sasl_username = os.getenv("IRC_SASL_USERNAME")
         self.sasl_password = os.getenv("IRC_SASL_PASSWORD")
@@ -52,6 +45,10 @@ class IRCBot:
             raise ValueError("IRC_SASL_USERNAME and IRC_SASL_PASSWORD must be set together")
         self.writer = None
         self.send_lock = asyncio.Lock()
+        self.last_message_sent = 0.0
+        self.registered = False
+        self.connected_at = None
+        self.message_tasks: set[asyncio.Task] = set()
 
     async def raw(self, line: str) -> None:
         if not self.writer:
@@ -79,8 +76,12 @@ class IRCBot:
                 chunks.append(current)
         async with self.send_lock:
             for chunk in chunks:
+                # Libera.Chat's normal message limit is one message every two seconds.
+                wait = 2.1 - (time.monotonic() - self.last_message_sent)
+                if wait > 0:
+                    await asyncio.sleep(wait)
                 await self.raw(f"PRIVMSG {target} :{chunk}")
-                await asyncio.sleep(0.8)
+                self.last_message_sent = time.monotonic()
 
     async def register(self) -> None:
         if self.server_password:
@@ -122,12 +123,27 @@ class IRCBot:
         elif command in {"904", "905", "906", "907"}:
             raise RuntimeError(f"SASL authentication failed: {rest}")
         elif command == "001":
+            self.registered = True
+            self.connected_at = time.monotonic()
             for channel in self.channels:
                 await self.raw(f"JOIN {channel}")
             LOGGER.info("Connected to %s:%s as %s; joined %s", self.host, self.port, self.nickname, ", ".join(self.channels))
         elif command == "433":
             raise RuntimeError(f"IRC nickname {self.nickname!r} is already in use")
+        elif command == "KICK":
+            channel, _, kicked = rest.partition(" ")
+            kicked = kicked.partition(" ")[0]
+            if kicked.lower() == self.nickname.lower():
+                # Do not fight an operator's decision by automatically rejoining.
+                LOGGER.warning("Kicked from %s; not rejoining until the next IRC connection", channel)
         elif command == "PRIVMSG":
+            task = asyncio.create_task(self.process_privmsg(tags, prefix, rest))
+            self.message_tasks.add(task)
+            task.add_done_callback(self.message_tasks.discard)
+
+    async def process_privmsg(self, tags: dict[str, str], prefix: str, rest: str) -> None:
+        """Process commands separately so slow HTTP APIs cannot delay IRC PONGs."""
+        try:
             target, separator, content = rest.partition(" :")
             if not separator:
                 return
@@ -144,12 +160,28 @@ class IRCBot:
             for reply in process_karma(content, identity):
                 await ctx.send(reply)
             await dispatch(ctx, content)
+        except Exception:
+            LOGGER.exception("Unhandled error while processing PRIVMSG")
 
     async def connect_once(self) -> None:
+        self.registered = False
+        self.connected_at = None
         ssl_context = ssl.create_default_context() if self.tls else None
         reader, self.writer = await asyncio.open_connection(self.host, self.port, ssl=ssl_context)
         await self.register()
-        while line_bytes := await reader.readline():
+        probing = False
+        while True:
+            try:
+                line_bytes = await asyncio.wait_for(reader.readline(), timeout=60 if probing else 240)
+            except asyncio.TimeoutError:
+                if probing:
+                    raise ConnectionError("IRC connection did not answer a keepalive probe")
+                await self.raw(f"PING :bofh-{int(time.time())}")
+                probing = True
+                continue
+            if not line_bytes:
+                break
+            probing = False
             line = line_bytes.decode("utf-8", errors="replace").rstrip("\r\n")
             LOGGER.debug("<< %s", line)
             await self.handle_line(line)
@@ -163,13 +195,19 @@ class IRCBot:
             except asyncio.CancelledError:
                 raise
             except Exception:
-                LOGGER.exception("IRC connection failed; retrying in %ss", delay)
-                await asyncio.sleep(delay)
-                delay = min(delay * 2, 60)
+                if self.connected_at and time.monotonic() - self.connected_at >= 300:
+                    delay = 2
+                retry_in = delay + random.uniform(0, min(delay * 0.25, 10))
+                LOGGER.exception("IRC connection failed; retrying in %.1fs", retry_in)
+                await asyncio.sleep(retry_in)
+                delay = min(delay * 2, 300)
             finally:
                 if self.writer:
                     self.writer.close()
-                    await self.writer.wait_closed()
+                    try:
+                        await self.writer.wait_closed()
+                    except (ConnectionError, OSError):
+                        pass
                     self.writer = None
 
 

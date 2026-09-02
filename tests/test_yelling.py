@@ -16,9 +16,7 @@ class YellingTests(unittest.TestCase):
         self.assertFalse(has_lowercase_word("MIRA https://example.com/foo :party_parrot:"))
 
     def test_relay_prefix_is_removed_before_yelling_check(self):
-        author, content = message_identity(
-            "nbot", "nbot", "<lowercase-user> TODO EN MAYUSCULAS", {"nbot"}
-        )
+        author, content = message_identity("nbot", "nbot", "<lowercase-user> TODO EN MAYUSCULAS", {"nbot"})
         self.assertEqual(author, "lowercase-user")
         self.assertFalse(has_lowercase_word(content))
 

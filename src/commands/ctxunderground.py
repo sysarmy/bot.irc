@@ -1,4 +1,5 @@
 import requests
+import asyncio
 from datetime import datetime
 from ratelimit import limits
 import os
@@ -14,14 +15,15 @@ load_dotenv()
 def get_tfl_status(api_key):
 
     # Conectamos a la API
-    api_key = os.getenv('TFL_key')
+    api_key = os.getenv("TFL_key")
     url = f"https://api.tfl.gov.uk/Line/Mode/tube/Status?app_key={api_key}"
-    response = requests.get(url)
+    response = requests.get(url, timeout=15)
     if response.status_code == 200:
         return response.json()
     else:
         print("Failed to retrieve data.")
         return None
+
 
 async def undergroundfunctx(ctx):
     FechaActual = datetime.now()
@@ -43,24 +45,24 @@ async def undergroundfunctx(ctx):
         "Northern": "Good Service",
         "Piccadilly": "Good Service",
         "Victoria": "Good Service",
-        "Waterloo & City": "Good Service"
+        "Waterloo & City": "Good Service",
     }
 
     # Hacemos el API call y traemos los estados de cada linea
-    api_key = os.getenv('SUBTEUK_api_key')
-    tube_status = get_tfl_status(api_key)
+    api_key = os.getenv("SUBTEUK_api_key")
+    tube_status = await asyncio.to_thread(get_tfl_status, api_key)
     if tube_status:
         for line in tube_status:
-            line_name = line['name']
-            if line['lineStatuses'][0]['statusSeverityDescription'] != 'Good Service':
-                lines_status[line_name] = line['lineStatuses'][0]['statusSeverityDescription']
+            line_name = line["name"]
+            if line["lineStatuses"][0]["statusSeverityDescription"] != "Good Service":
+                lines_status[line_name] = line["lineStatuses"][0]["statusSeverityDescription"]
 
-    # Concatenamos el mensaje para cada linea y se manda el mensaje al canal
+        # Concatenamos el mensaje para cada linea y se manda el mensaje al canal
         for line_name, status in lines_status.items():
-            if status == 'Good Service':
+            if status == "Good Service":
                 message += f"🟢 {line_name}: {status}\n"
             else:
-                message += f"🔴 {line_name}: {status}\n"   
+                message += f"🔴 {line_name}: {status}\n"
         await ctx.send(message)
     else:
         print("Error en el request")

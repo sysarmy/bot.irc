@@ -21,7 +21,6 @@ from src.commands.ctxstatus import statusfunctx
 from src.commands.ctxunderground import undergroundfunctx
 from src.help import help_message, missing_argument_message
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -39,17 +38,29 @@ class CommandContext:
 
 
 COMMANDS = {
-    "birras": (birrasfunctx, 0), "caucho": (cauchofunctx, 0),
-    "clima": (climafunctx, 1), "cripto": (criptofunctx, 0),
-    "dolar": (dolarfunctx, -1), "dolor": (dolarfunctx, -1), "euro": (eurofunctx, 0),
-    "feriadoar": (feriadoarfunctx, 0), "feriadocl": (feriadoclfunctx, 0),
-    "feriadoes": (feriadoesfunctx, 0), "feriadomx": (feriadomxfunctx, 0),
-    "feriadouy": (feriadouyfunctx, 0), "fulbo": (fulbofunctx, 1),
-    "rank": (karmarankfunctx, 0), "karma": (karmawordfunctx, 1),
-    "kgivers": (karmagiversfunctx, 0), "kgiven": (karmagiversuserfunctx, 1),
-    "pesos": (pesosfunctx, 1), "q": (quotefunctx, 0),
-    "qadd": (quoteaddfunctx, 1), "qsearch": (qsearchfunctx, 1),
-    "subte": (subtefunctx, 0), "status": (statusfunctx, 1),
+    "birras": (birrasfunctx, 0),
+    "caucho": (cauchofunctx, 0),
+    "clima": (climafunctx, 1),
+    "cripto": (criptofunctx, 0),
+    "dolar": (dolarfunctx, -1),
+    "dolor": (dolarfunctx, -1),
+    "euro": (eurofunctx, 0),
+    "feriadoar": (feriadoarfunctx, 0),
+    "feriadocl": (feriadoclfunctx, 0),
+    "feriadoes": (feriadoesfunctx, 0),
+    "feriadomx": (feriadomxfunctx, 0),
+    "feriadouy": (feriadouyfunctx, 0),
+    "fulbo": (fulbofunctx, 1),
+    "rank": (karmarankfunctx, 0),
+    "karma": (karmawordfunctx, 1),
+    "kgivers": (karmagiversfunctx, 0),
+    "kgiven": (karmagiversuserfunctx, 1),
+    "pesos": (pesosfunctx, 1),
+    "q": (quotefunctx, 0),
+    "qadd": (quoteaddfunctx, 1),
+    "qsearch": (qsearchfunctx, 1),
+    "subte": (subtefunctx, 0),
+    "status": (statusfunctx, 1),
     "underground": (undergroundfunctx, 0),
 }
 
