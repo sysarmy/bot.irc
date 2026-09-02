@@ -71,8 +71,10 @@ async def dispatch(ctx: CommandContext, content: str) -> None:
     command_line = content[1:].strip()
     if not command_line:
         return
-    command, _, argument = command_line.partition(" ")
-    command = command.lower()
+    parts = command_line.split(maxsplit=1)
+    command = parts[0].lower()
+    # Everything after the command is one argument, including multi-word places.
+    argument = " ".join(parts[1].split()) if len(parts) == 2 else ""
 
     if command == "help":
         await ctx.send(help_message(argument))
