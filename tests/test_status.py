@@ -6,6 +6,9 @@ from src.commands.ctxstatus import STATUSPAGE_SERVICES, estimated_uptime, status
 
 
 class StatusTests(unittest.IsolatedAsyncioTestCase):
+    def test_claude_is_supported(self):
+        self.assertEqual(STATUSPAGE_SERVICES["claude"], ("Claude", "https://status.claude.com"))
+
     def test_uptime_merges_overlapping_incidents(self):
         now = datetime(2026, 8, 21, tzinfo=timezone.utc)
         incidents = [

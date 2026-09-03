@@ -7,6 +7,7 @@ WINDOW_DAYS = 30
 
 STATUSPAGE_SERVICES = {
     "atlassian": ("Atlassian", "https://status.atlassian.com"),
+    "claude": ("Claude", "https://status.claude.com"),
     "cloudflare": ("Cloudflare", "https://www.cloudflarestatus.com"),
     "datadog": ("Datadog US1", "https://status.datadoghq.com"),
     "digitalocean": ("DigitalOcean", "https://status.digitalocean.com"),
