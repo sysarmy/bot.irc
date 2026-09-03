@@ -12,6 +12,7 @@ STATUSPAGE_SERVICES = {
     "datadog": ("Datadog US1", "https://status.datadoghq.com"),
     "digitalocean": ("DigitalOcean", "https://status.digitalocean.com"),
     "discord": ("Discord", "https://discordstatus.com"),
+    "donweb": ("DonWeb", "https://status.donweb.com"),
     "github": ("GitHub", "https://www.githubstatus.com"),
     "npm": ("npm", "https://status.npmjs.org"),
     "openai": ("OpenAI", "https://status.openai.com"),

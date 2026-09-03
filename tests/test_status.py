@@ -9,6 +9,9 @@ class StatusTests(unittest.IsolatedAsyncioTestCase):
     def test_claude_is_supported(self):
         self.assertEqual(STATUSPAGE_SERVICES["claude"], ("Claude", "https://status.claude.com"))
 
+    def test_donweb_is_supported(self):
+        self.assertEqual(STATUSPAGE_SERVICES["donweb"], ("DonWeb", "https://status.donweb.com"))
+
     def test_uptime_merges_overlapping_incidents(self):
         now = datetime(2026, 8, 21, tzinfo=timezone.utc)
         incidents = [
