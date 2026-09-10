@@ -1,63 +1,61 @@
-# BOFH IRC bot
+# Bot IRC BOFH
 
-IRC-only version of the Sysarmy BOFH bot. It listens to every `PRIVMSG`, runs commands only when the message starts with `!`, and retains text karma (`word++` and `word--`) using the existing `db/karma.db` schema.
+Versión exclusiva para IRC del bot BOFH de Sysarmy. Este repositorio es la migración del histórico repositorio [sysarmy/bot.ai](https://github.com/sysarmy/bot.ai): conserva las funcionalidades de IRC y deja afuera las integraciones específicas de Discord.
 
-Discord-only slash commands, reactions, member synchronization, embeds, job forum operations, and Discord RSS publishing are intentionally excluded.
+¡Las contribuciones son bienvenidas! Si encontrás un problema o querés proponer una mejora, abrí un issue o mandá un pull request.
 
-## Run with Docker Compose
+El bot escucha todos los `PRIVMSG`, ejecuta comandos solamente cuando el mensaje empieza con `!` y mantiene el karma de texto (`palabra++` y `palabra--`) usando el esquema existente de `db/karma.db`.
 
-1. Copy `.env.example` to `.env` and configure the IRC connection.
-2. Copy the existing `karma.db` and, optionally, `quotes.db` into `db/`.
-3. Start the bot:
+Los comandos slash de Discord, reacciones, sincronización de miembros, embeds, operaciones del foro de empleos y publicación de RSS en Discord quedaron intencionalmente fuera de este proyecto.
+
+## Ejecutarlo con Docker Compose
+
+1. Copiá `.env.example` a `.env` y configurá la conexión a IRC.
+2. Copiá los archivos existentes `karma.db` y, opcionalmente, `quotes.db` dentro de `db/`.
+3. Iniciá el bot:
 
    ```sh
    docker compose up --build -d
    docker compose logs -f bot
    ```
 
-The complete `db/` directory is mounted at `/app/db`; SQLite updates persist on the host. If a database is absent, the bot creates a compatible empty one.
-`main.py` and `src/` are also mounted read-only, so after pulling code changes only restart the bot:
+Se monta el directorio completo `db/` en `/app/db`; las actualizaciones de SQLite persisten en el host. Si falta una base de datos, el bot crea una vacía compatible.
+`main.py` y `src/` también se montan como solo lectura, así que después de traer cambios de código solo hace falta reiniciar el bot:
 
 ```sh
 git pull
 docker compose restart bot
 ```
 
-Rebuild with `docker compose up --build -d` only when `requirements.txt` or the Dockerfile changes.
-On Linux, set `PUID` and `PGID` in `.env` to the owner of the `db/` directory so SQLite remains writable.
+Reconstruí con `docker compose up --build -d` solamente cuando cambien `requirements.txt` o el Dockerfile.
+En Linux, configurá `PUID` y `PGID` en `.env` con el propietario del directorio `db/` para que SQLite pueda escribir.
 
-To join multiple channels, list them comma-separated in `.env`:
+Para conectarte a varios canales, listalos separados por comas en `.env`:
 
 ```dotenv
 IRC_CHANNELS="#sysarmy,#sysarmy-offtopic,#jobs"
 ```
 
-The bot joins every listed channel and replies in the channel where each command was received.
+El bot entra a todos los canales indicados y responde en el canal donde recibió cada comando.
 
-## Libera.Chat operation
+## Operación en Libera.Chat
 
-Use TLS and SASL, register a separate account for the bot, and set `IRC_REALNAME` so the
-bot is clearly identified and an administrator can be contacted. Obtain permission from
-the operators of every configured channel before adding it to `IRC_CHANNELS`.
+Usá TLS y SASL, registrá una cuenta separada para el bot y configurá `IRC_REALNAME` para identificarlo claramente e indicar cómo contactar a quien lo administra. Pedí permiso a los operadores de cada canal configurado antes de agregarlo a `IRC_CHANNELS`.
 
-The client answers server pings independently of slow command APIs, probes silent
-connections, reconnects with exponential backoff and jitter, and rejoins the configured
-channels after a connection loss. It deliberately does not immediately rejoin after a
-channel operator kicks it. Outbound messages are serialized at one every 2.1 seconds to
-stay within Libera.Chat's normal message rate.
+El cliente responde a los pings del servidor aun cuando las APIs de comandos estén lentas, detecta conexiones silenciosas, se reconecta con backoff exponencial y jitter, y vuelve a entrar a los canales configurados luego de perder la conexión. Intencionalmente no intenta volver a entrar de inmediato si un operador lo expulsa. Los mensajes salientes se serializan a razón de uno cada 2,1 segundos para respetar el límite habitual de Libera.Chat.
 
-## Identity and karma
+## Identidad y karma
 
-When the server supports IRCv3 `account-tag`, the authenticated account name is recorded as the karma giver. Otherwise the bot falls back to the current nickname. SASL is therefore recommended.
+Cuando el servidor soporta `account-tag` de IRCv3, se registra el nombre de la cuenta autenticada como quien otorgó el karma. De lo contrario, el bot usa el nick actual. Por eso se recomienda SASL.
 
-Do not run this bot with the same nickname as a connected Matterbridge instance: IRC nicknames must be unique. Many networks allow the same NickServ/SASL account to have multiple concurrent connections with distinct nicknames, but this depends on network policy.
+No ejecutes este bot con el mismo nick que una instancia conectada de Matterbridge: los nicks de IRC tienen que ser únicos. Muchas redes permiten varias conexiones simultáneas de una misma cuenta NickServ/SASL con nicks distintos, aunque depende de la política de cada red.
 
-Matterbridge messages in the form `<username> !command` are supported when they come from a configured bridge nickname. `IRC_BRIDGE_NICKS` is a comma-separated list and defaults to `nbot`; the relayed username is used as the command and karma identity.
+Se soportan los mensajes de Matterbridge con el formato `<usuario> !comando` cuando provienen de un nick de bridge configurado. `IRC_BRIDGE_NICKS` es una lista separada por comas y su valor predeterminado es `nbot`; el nombre de usuario reenviado se usa como identidad para comandos y karma.
 
-## Yelling channel
+## Canal de gritos
 
-`IRC_YELLING_CHANNELS` is a comma-separated list that defaults to `#sysarmy-yelling`. Messages containing lowercase words receive a random all-caps reminder. URLs and `:emoji:` tokens are ignored. Matterbridge messages are checked after extracting their Discord or Slack username and content.
+`IRC_YELLING_CHANNELS` es una lista separada por comas cuyo valor predeterminado es `#sysarmy-yelling`. Los mensajes que contienen palabras en minúscula reciben un recordatorio aleatorio en mayúsculas. Se ignoran las URLs y los tokens `:emoji:`. Los mensajes de Matterbridge se verifican luego de extraer el nombre de usuario y el contenido de Discord o Slack.
 
-## Commands
+## Comandos
 
-Run `!help` for the current list. The migrated commands are `birras`, `caucho`, `clima`, `cripto`, `dolar`, `euro`, country holiday commands, `fulbo`, karma/ranking commands, peso conversion, quotes, `subte`, `underground`, and the small utility commands.
+Ejecutá `!help` para ver la lista actual. Los comandos migrados incluyen `birras`, `caucho`, `clima`, `cripto`, `dolar`, `euro`, comandos de feriados por país, `fulbo`, comandos de karma y ranking, conversión de pesos, citas, `subte`, `underground` y utilidades pequeñas.
