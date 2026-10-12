@@ -11,6 +11,12 @@ AUTH0_STATUS_URL = "https://status.auth0.com"
 AUTH0_IMPACT_ORDER = {"none": 0, "minor": 1, "major": 2, "critical": 3}
 AUTH0_ERRORS = (requests.RequestException, KeyError, TypeError, ValueError, AttributeError, IndexError)
 
+# GitLab usa status.io (no Statuspage) y no expone uptime publico, asi que el estado
+# y el uptime se toman de PulsAPI, un monitor de terceros con API publica sin auth.
+GITLAB_PULSAPI_URL = "https://www.pulsapi.com/services/gitlab"
+GITLAB_PULSAPI_API = "https://www.pulsapi.com/api/services/gitlab"
+GITLAB_ERRORS = (requests.RequestException, KeyError, TypeError, ValueError)
+
 STATUSPAGE_SERVICES = {
     "atlassian": ("Atlassian", "https://status.atlassian.com"),
     "claude": ("Claude", "https://status.claude.com"),
@@ -26,7 +32,7 @@ STATUSPAGE_SERVICES = {
 
 
 def supported_services() -> str:
-    return ", ".join(sorted([*STATUSPAGE_SERVICES, "auth0"]))
+    return ", ".join(sorted([*STATUSPAGE_SERVICES, "auth0", "gitlab"]))
 
 
 def parse_timestamp(value: str) -> datetime:
@@ -123,10 +129,32 @@ async def auth0_statusfunctx(ctx):
     )
 
 
+async def gitlab_statusfunctx(ctx):
+    try:
+        status_response = await asyncio.to_thread(requests.get, GITLAB_PULSAPI_API, timeout=10)
+        status_response.raise_for_status()
+        current_status = status_response.json()["currentStatus"]
+        uptime_response = await asyncio.to_thread(requests.get, f"{GITLAB_PULSAPI_API}/uptime", timeout=10)
+        uptime_response.raise_for_status()
+        uptime = uptime_response.json().get("30d", {}).get("uptimePercentage")
+    except GITLAB_ERRORS:
+        await ctx.send("No se pudo consultar el estado de GitLab. Intenta nuevamente mas tarde.")
+        return
+
+    state = "UP" if current_status == "OPERATIONAL" else f"DEGRADADO ({current_status})"
+    uptime_text = f"{uptime:.3f}%" if isinstance(uptime, (int, float)) else "no disponible"
+    await ctx.send(
+        f"GitLab: {state} - Uptime 30 dias (PulsAPI): {uptime_text} - Fuente: {GITLAB_PULSAPI_URL}"
+    )
+
+
 async def statusfunctx(ctx, service: str):
     service = service.strip().lower()
     if service == "auth0":
         await auth0_statusfunctx(ctx)
+        return
+    if service == "gitlab":
+        await gitlab_statusfunctx(ctx)
         return
     definition = STATUSPAGE_SERVICES.get(service)
     if not definition:

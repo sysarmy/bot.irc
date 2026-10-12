@@ -54,10 +54,83 @@ class StatusTests(unittest.IsolatedAsyncioTestCase):
         ctx = unittest.mock.Mock()
         ctx.send = AsyncMock()
 
-        await statusfunctx(ctx, "gitlab")
+        await statusfunctx(ctx, "serviciofalso")
 
         ctx.send.assert_awaited_once_with(f"Servicio no soportado. Servicios disponibles: {supported_services()}")
         self.assertIn("auth0", supported_services())
+
+    def test_gitlab_is_supported(self):
+        self.assertIn("gitlab", supported_services())
+
+    async def test_gitlab_reports_operational_status_and_uptime(self):
+        status_response = Mock()
+        status_response.raise_for_status.return_value = None
+        status_response.json.return_value = {"name": "GitLab", "currentStatus": "OPERATIONAL"}
+        uptime_response = Mock()
+        uptime_response.raise_for_status.return_value = None
+        uptime_response.json.return_value = {"30d": {"uptimePercentage": 99.3399, "mttrMinutes": None}}
+        ctx = unittest.mock.Mock()
+        ctx.send = AsyncMock()
+
+        with patch(
+            "src.commands.ctxstatus.requests.get",
+            side_effect=[status_response, uptime_response],
+        ) as get:
+            await statusfunctx(ctx, "GitLab")
+
+        self.assertEqual(
+            get.call_args_list,
+            [
+                call("https://www.pulsapi.com/api/services/gitlab", timeout=10),
+                call("https://www.pulsapi.com/api/services/gitlab/uptime", timeout=10),
+            ],
+        )
+        message = ctx.send.await_args.args[0]
+        self.assertIn("GitLab: UP", message)
+        self.assertIn("99.340%", message)
+
+    async def test_gitlab_reports_degraded_status(self):
+        status_response = Mock()
+        status_response.raise_for_status.return_value = None
+        status_response.json.return_value = {"currentStatus": "MAJOR_OUTAGE"}
+        uptime_response = Mock()
+        uptime_response.raise_for_status.return_value = None
+        uptime_response.json.return_value = {"30d": {"uptimePercentage": 95.0}}
+        ctx = unittest.mock.Mock()
+        ctx.send = AsyncMock()
+
+        with patch("src.commands.ctxstatus.requests.get", side_effect=[status_response, uptime_response]):
+            await statusfunctx(ctx, "gitlab")
+
+        message = ctx.send.await_args.args[0]
+        self.assertIn("GitLab: DEGRADADO (MAJOR_OUTAGE)", message)
+        self.assertIn("95.000%", message)
+
+    async def test_gitlab_handles_missing_uptime_value(self):
+        status_response = Mock()
+        status_response.raise_for_status.return_value = None
+        status_response.json.return_value = {"currentStatus": "OPERATIONAL"}
+        uptime_response = Mock()
+        uptime_response.raise_for_status.return_value = None
+        uptime_response.json.return_value = {"30d": {"uptimePercentage": None}}
+        ctx = unittest.mock.Mock()
+        ctx.send = AsyncMock()
+
+        with patch("src.commands.ctxstatus.requests.get", side_effect=[status_response, uptime_response]):
+            await statusfunctx(ctx, "gitlab")
+
+        message = ctx.send.await_args.args[0]
+        self.assertIn("GitLab: UP", message)
+        self.assertIn("no disponible", message)
+
+    async def test_gitlab_failure_is_reported(self):
+        ctx = unittest.mock.Mock()
+        ctx.send = AsyncMock()
+
+        with patch("src.commands.ctxstatus.requests.get", side_effect=requests.RequestException("boom")):
+            await statusfunctx(ctx, "gitlab")
+
+        ctx.send.assert_awaited_once_with("No se pudo consultar el estado de GitLab. Intenta nuevamente mas tarde.")
 
     async def test_statuspage_service_uses_its_configured_endpoints(self):
         status_response = Mock()
