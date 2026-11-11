@@ -23,6 +23,10 @@ logging.basicConfig(
 LOGGER = logging.getLogger("bofh-irc")
 
 
+class IRCBanError(RuntimeError):
+    """The server explicitly rejected this client; do not reconnect automatically."""
+
+
 def env_bool(name: str, default: bool) -> bool:
     return os.getenv(name, str(default)).lower() in {"1", "true", "yes", "on"}
 
@@ -122,6 +126,8 @@ class IRCBot:
             await self.raw("CAP REQ :account-tag")
         elif command in {"904", "905", "906", "907"}:
             raise RuntimeError(f"SASL authentication failed: {rest}")
+        elif command == "465":
+            raise IRCBanError(f"IRC server banned this client: {rest}")
         elif command == "001":
             self.registered = True
             self.connected_at = time.monotonic()
@@ -188,19 +194,22 @@ class IRCBot:
         raise ConnectionError("IRC server closed the connection")
 
     async def run(self) -> None:
-        delay = 2
+        delay = 30
         while True:
             try:
                 await self.connect_once()
             except asyncio.CancelledError:
                 raise
+            except IRCBanError:
+                LOGGER.exception("IRC server ban received; stopping without reconnecting")
+                raise
             except Exception:
                 if self.connected_at and time.monotonic() - self.connected_at >= 300:
-                    delay = 2
+                    delay = 30
                 retry_in = delay + random.uniform(0, min(delay * 0.25, 10))
                 LOGGER.exception("IRC connection failed; retrying in %.1fs", retry_in)
                 await asyncio.sleep(retry_in)
-                delay = min(delay * 2, 300)
+                delay = min(delay * 2, 900)
             finally:
                 if self.writer:
                     self.writer.close()

@@ -42,7 +42,7 @@ El bot entra a todos los canales indicados y responde en el canal donde recibió
 
 Usá TLS y SASL, registrá una cuenta separada para el bot y configurá `IRC_REALNAME` para identificarlo claramente e indicar cómo contactar a quien lo administra. Pedí permiso a los operadores de cada canal configurado antes de agregarlo a `IRC_CHANNELS`.
 
-El cliente responde a los pings del servidor aun cuando las APIs de comandos estén lentas, detecta conexiones silenciosas, se reconecta con backoff exponencial y jitter, y vuelve a entrar a los canales configurados luego de perder la conexión. Intencionalmente no intenta volver a entrar de inmediato si un operador lo expulsa. Los mensajes salientes se serializan a razón de uno cada 2,1 segundos para respetar el límite habitual de Libera.Chat.
+El cliente responde a los pings del servidor aun cuando las APIs de comandos estén lentas, detecta conexiones silenciosas y vuelve a entrar a los canales configurados luego de perder la conexión. Las reconexiones empiezan tras 30 segundos, usan backoff exponencial con jitter y se limitan a 15 minutos. Ante un ban del servidor (numérico IRC `465`), el proceso termina para evitar nuevos intentos automáticos. Intencionalmente no intenta volver a entrar de inmediato si un operador lo expulsa. Los mensajes salientes se serializan a razón de uno cada 2,1 segundos para respetar el límite habitual de Libera.Chat.
 
 ## Identidad y karma
 
